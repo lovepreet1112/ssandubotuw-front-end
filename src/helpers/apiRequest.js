@@ -1,7 +1,8 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://backend-eight-pi-91.vercel.app/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -10,6 +11,16 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Attach JWT token from localStorage if available (supports cross-site cookie restrictions)
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('sandh_token');
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 
 /**
  * Reusable Centralized API Request Helper
