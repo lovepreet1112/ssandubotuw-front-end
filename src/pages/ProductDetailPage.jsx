@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Star,
@@ -7,11 +7,8 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  Sparkles,
   Plus,
   Minus,
-  CheckCircle,
-  MessageSquare,
 } from 'lucide-react';
 import { fetchProductDetails } from '../redux/slices/productSlice';
 import { addToCart } from '../redux/slices/cartSlice';
@@ -27,9 +24,10 @@ export const ProductDetailPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { currentProduct, detailsLoading } = useSelector((state) => state.products);
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [activeImage, setActiveImage] = useState('');
   const [selectedSize, setSelectedSize] = useState('M');
@@ -111,6 +109,12 @@ export const ProductDetailPage = () => {
 
   const handleAddToCart = () => {
     if (isOutOfStock || isUpcoming) return;
+    if (!isAuthenticated) {
+      toast.error('Please sign in to add items to your cart');
+      const redirectPath = encodeURIComponent(location.pathname + location.search);
+      navigate(`/login?redirect=${redirectPath}`);
+      return;
+    }
     dispatch(
       addToCart({
         productId: _id,
@@ -124,6 +128,11 @@ export const ProductDetailPage = () => {
 
   const handleBuyNow = () => {
     if (isOutOfStock || isUpcoming) return;
+    if (!isAuthenticated) {
+      toast.error('Please sign in to proceed to checkout');
+      navigate('/login?redirect=checkout');
+      return;
+    }
     dispatch(
       addToCart({
         productId: _id,
@@ -133,11 +142,7 @@ export const ProductDetailPage = () => {
         selectedDesign: design,
       })
     );
-    if (!isAuthenticated) {
-      navigate('/login?redirect=checkout');
-    } else {
-      navigate('/checkout');
-    }
+    navigate('/checkout');
   };
 
   const handleReviewSubmit = async (e) => {

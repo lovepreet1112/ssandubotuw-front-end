@@ -1,13 +1,16 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { ShoppingBag, Star, Eye } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { addToCart } from '../../redux/slices/cartSlice';
 import Badge from '../common/Badge';
 
 export const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   if (!product) return null;
 
@@ -38,6 +41,14 @@ export const ProductCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock || isUpcoming) return;
+
+    if (!isAuthenticated) {
+      toast.error('Please sign in to add items to your cart');
+      const redirectPath = encodeURIComponent(location.pathname + location.search);
+      navigate(`/login?redirect=${redirectPath}`);
+      return;
+    }
+
     dispatch(
       addToCart({
         productId: _id,

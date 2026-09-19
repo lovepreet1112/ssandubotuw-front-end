@@ -3,6 +3,7 @@ import adminService from '../services/adminService';
 import productService from '../services/productService';
 import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
+import { TableLoader, TableEmpty } from '../components/common/Loader';
 import { Layers, AlertTriangle, Check, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -72,22 +73,27 @@ export const AdminInventoryPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DDCBA4]/30 text-[#2A2923]">
-              {inventory.map((item) => {
-                const isOut = item.stock <= 0;
-                const isLow = item.stock > 0 && item.stock <= (item.lowStockThreshold || 5);
+              {loading ? (
+                <TableLoader colSpan={6} message="Auditing stock inventory & thresholds..." />
+              ) : inventory.length === 0 ? (
+                <TableEmpty colSpan={6} message="No inventory items found" />
+              ) : (
+                inventory.map((item) => {
+                  const isOut = item.stock <= 0;
+                  const isLow = item.stock > 0 && item.stock <= (item.lowStockThreshold || 5);
 
-                return (
-                  <tr key={item._id} className="hover:bg-[#FAEDCD]/20">
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={item.thumbnail}
-                          alt={item.name}
-                          className="w-10 h-12 object-cover rounded-sm border border-[#DDCBA4]"
-                        />
-                        <span className="font-serif font-semibold text-[#2A2923]">{item.name}</span>
-                      </div>
-                    </td>
+                  return (
+                    <tr key={item._id} className="hover:bg-[#FAEDCD]/20">
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.thumbnail}
+                            alt={item.name}
+                            className="w-10 h-12 object-cover rounded-sm border border-[#DDCBA4]"
+                          />
+                          <span className="font-serif font-semibold text-[#2A2923]">{item.name}</span>
+                        </div>
+                      </td>
                     <td className="p-3">{item.category}</td>
                     <td className="p-3 font-semibold text-[#2A2923]">
                       <span className={isOut ? 'text-red-700' : isLow ? 'text-amber-700' : ''}>
@@ -123,10 +129,11 @@ export const AdminInventoryPage = () => {
                           +5
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

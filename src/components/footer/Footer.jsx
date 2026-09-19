@@ -33,7 +33,7 @@ export const Footer = () => {
                 SANDH BOUTIQUE
               </h2>
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#D4A373] font-serif">
-                ਸੰਧ ਬੁਟੀਕ • Handcrafted Winter Warmth
+                ਸਿੱਧੂ ਬੁਟੀਕ • Handcrafted Winter Warmth
               </p>
             </Link>
             <p className="text-sm text-[#686558] max-w-sm leading-relaxed">
@@ -184,7 +184,7 @@ export const Footer = () => {
         {/* Copyright and Legal */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#686558]">
           <p className="flex items-center gap-1">
-            © {new Date().getFullYear()} Sandh Boutique (ਸੰਧ ਬੁਟੀਕ). Crafted with{' '}
+            © {new Date().getFullYear()} Sandh Boutique (ਸਿੱਧੂ ਬੁਟੀਕ). Crafted with{' '}
             <Heart className="w-3 h-3 text-[#D4A373] fill-[#D4A373]" /> for winter elegance.
           </p>
           <div className="flex space-x-6 text-[11px]">

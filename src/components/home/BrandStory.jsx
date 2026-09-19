@@ -27,7 +27,7 @@ export const BrandStory = () => {
 
               <div className="space-y-4 pt-8">
                 <div className="p-4 bg-[#FAEDCD] rounded-sm border border-[#DDCBA4]">
-                  <p className="font-serif text-lg font-bold text-[#D4A373]">ਸੰਧ ਵਿਰਾਸਤ</p>
+                  <p className="font-serif text-lg font-bold text-[#D4A373]">ਸਿੱਧੂ ਵਿਰਾਸਤ</p>
                   <p className="text-xs text-[#686558] mt-0.5">Generations of Punjabi Textile Grace</p>
                 </div>
                 <div className="aspect-[3/4] rounded-sm overflow-hidden border border-[#DDCBA4] shadow-warm-sm bg-[#CCD5AE]">

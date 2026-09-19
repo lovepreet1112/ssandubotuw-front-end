@@ -3,6 +3,7 @@ import adminService from '../services/adminService';
 import Badge from '../components/common/Badge';
 import Modal from '../components/common/Modal';
 import Button from '../components/common/Button';
+import { TableLoader, TableEmpty } from '../components/common/Loader';
 import { Eye, Edit3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -107,47 +108,53 @@ export const AdminOrdersPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DDCBA4]/30 text-[#2A2923]">
-              {orders.map((ord) => (
-                <tr key={ord._id} className="hover:bg-[#FAEDCD]/20">
-                  <td className="p-3 font-mono font-medium">{ord.orderNumber}</td>
-                  <td className="p-3">
-                    <div>
-                      <p className="font-semibold text-[#2A2923]">
-                        {ord.user?.name || ord.shippingAddress?.fullName}
-                      </p>
-                      <p className="text-[11px] text-[#686558]">{ord.shippingAddress?.phone}</p>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <span className="text-[#686558]">
-                      {ord.items.length} items ({ord.items.reduce((s, i) => s + i.quantity, 0)} pcs)
-                    </span>
-                  </td>
-                  <td className="p-3 font-semibold text-[#D4A373]">
-                    ₹{ord.total.toLocaleString('en-IN')}
-                  </td>
-                  <td className="p-3">
-                    <Badge variant={ord.paymentInfo?.status || 'pending'}>
-                      {ord.paymentInfo?.status || 'pending'}
-                    </Badge>
-                  </td>
-                  <td className="p-3">
-                    <Badge variant={ord.orderStatus}>{ord.orderStatus.replace('_', ' ')}</Badge>
-                  </td>
-                  <td className="p-3 text-[#686558]">
-                    {new Date(ord.createdAt).toLocaleDateString('en-IN')}
-                  </td>
-                  <td className="p-3 text-right space-x-1">
-                    <button
-                      onClick={() => handleOpenStatusEdit(ord)}
-                      className="p-1 text-[#686558] hover:text-[#D4A373]"
-                      title="Update Order Status"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <TableLoader colSpan={8} message="Fetching dispatch orders..." />
+              ) : orders.length === 0 ? (
+                <TableEmpty colSpan={8} message="No customer orders found" />
+              ) : (
+                orders.map((ord) => (
+                  <tr key={ord._id} className="hover:bg-[#FAEDCD]/20">
+                    <td className="p-3 font-mono font-medium">{ord.orderNumber}</td>
+                    <td className="p-3">
+                      <div>
+                        <p className="font-semibold text-[#2A2923]">
+                          {ord.user?.name || ord.shippingAddress?.fullName}
+                        </p>
+                        <p className="text-[11px] text-[#686558]">{ord.shippingAddress?.phone}</p>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <span className="text-[#686558]">
+                        {ord.items.length} items ({ord.items.reduce((s, i) => s + i.quantity, 0)} pcs)
+                      </span>
+                    </td>
+                    <td className="p-3 font-semibold text-[#D4A373]">
+                      ₹{ord.total.toLocaleString('en-IN')}
+                    </td>
+                    <td className="p-3">
+                      <Badge variant={ord.paymentInfo?.status || 'pending'}>
+                        {ord.paymentInfo?.status || 'pending'}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <Badge variant={ord.orderStatus}>{ord.orderStatus.replace('_', ' ')}</Badge>
+                    </td>
+                    <td className="p-3 text-[#686558]">
+                      {new Date(ord.createdAt).toLocaleDateString('en-IN')}
+                    </td>
+                    <td className="p-3 text-right space-x-1">
+                      <button
+                        onClick={() => handleOpenStatusEdit(ord)}
+                        className="p-1 text-[#686558] hover:text-[#D4A373]"
+                        title="Update Order Status"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

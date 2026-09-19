@@ -56,7 +56,7 @@ export const Navbar = () => {
             {/* Left Side: Brand Logo strictly in Punjabi */}
             <Link to="/" className="flex flex-col items-start group">
               <span className="font-serif text-2xl sm:text-3xl font-bold tracking-wide text-[#2A2923] group-hover:text-[#D4A373] transition-colors">
-                ਸੰਧ ਬੁਟੀਕ
+                ਸਿੱਧੂ ਬੁਟੀਕ
               </span>
               <span className="text-[11px] tracking-[0.2em] font-medium text-[#D4A373] -mt-1">
                 ਹੱਥੀਂ ਬੁਣਿਆ ਨਿੱਘ

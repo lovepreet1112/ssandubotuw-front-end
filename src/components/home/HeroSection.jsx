@@ -19,7 +19,7 @@ export const HeroSection = () => {
             {/* Heritage Pill */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E9EDC9] border border-[#CCD5AE] text-xs font-semibold text-[#2A2923]">
               <Sparkles className="w-3.5 h-3.5 text-[#D4A373]" />
-              <span>ਸੰਧ ਬੁਟੀਕ • Heirloom Winter Knitwear 2026</span>
+              <span>ਸਿੱਧੂ ਬੁਟੀਕ • Heirloom Winter Knitwear 2026</span>
             </div>
 
             {/* Main Headline */}

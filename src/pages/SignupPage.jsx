@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { UserPlus, Lock, Mail, User, Phone } from 'lucide-react';
 import { signupUser } from '../redux/slices/authSlice';
@@ -14,8 +14,12 @@ export const SignupPage = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { loading, error } = useSelector((state) => state.auth);
+
+  // Check redirect destination
+  const from = location.state?.from?.pathname || new URLSearchParams(location.search).get('redirect') || '';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,16 +29,21 @@ export const SignupPage = () => {
     e.preventDefault();
     const result = await dispatch(signupUser(formData));
     if (result.type === 'auth/signup/fulfilled') {
-      navigate('/clothing');
+      if (from) {
+        const target = from === 'checkout' ? '/checkout' : from === 'cart' ? '/cart' : from;
+        navigate(target);
+      } else {
+        navigate('/clothing');
+      }
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-[#FDFBF7] p-8 md:p-10 border border-[#DDCBA4] rounded-sm shadow-warm-md">
+    <div className="w-full max-w-md mx-auto my-auto">
+      <div className="w-full space-y-8 bg-[#FDFBF7] p-8 md:p-10 border border-[#DDCBA4] rounded-sm shadow-warm-md">
         <div className="text-center space-y-2">
           <span className="text-[11px] uppercase tracking-[0.25em] text-[#D4A373] font-semibold">
-            ਸੰਧ ਬੁਟੀਕ • Join Our Atelier
+            ਸਿੱਧੂ ਬੁਟੀਕ • Join Our Atelier
           </span>
           <h2 className="font-serif text-3xl font-bold text-[#2A2923]">Create Your Account</h2>
           <p className="text-xs text-[#686558]">
@@ -128,7 +137,7 @@ export const SignupPage = () => {
 
         <div className="text-center pt-2 text-xs text-[#686558]">
           <span>Already have an account? </span>
-          <Link to="/login" className="text-[#D4A373] font-semibold hover:underline">
+          <Link to={location.search ? `/login${location.search}` : '/login'} className="text-[#D4A373] font-semibold hover:underline">
             Log In Here
           </Link>
         </div>

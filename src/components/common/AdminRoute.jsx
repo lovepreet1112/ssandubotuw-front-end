@@ -6,7 +6,7 @@ import { InlineLoader } from './Loader';
 export const AdminRoute = ({ children }) => {
   const { user, isAuthenticated, isAdmin, authChecked, loading } = useSelector((state) => state.auth);
 
-  if (!authChecked && loading) {
+  if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
         <InlineLoader size="lg" />

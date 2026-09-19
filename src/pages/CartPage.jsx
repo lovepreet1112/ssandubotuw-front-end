@@ -38,10 +38,14 @@ export const CartPage = () => {
       <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <EmptyState
           icon={ShoppingBag}
-          title="Your Winter Bag is Empty"
-          description="Explore our hand-knitted pullovers, cardigans, and bespoke winter wraps to warm your season."
-          actionLabel="Explore Collection"
-          onAction={() => navigate('/clothing')}
+          title={!isAuthenticated ? 'Sign In to View Your Bag' : 'Your Winter Bag is Empty'}
+          description={
+            !isAuthenticated
+              ? 'Log in to view saved items in your cart, track orders, and complete checkout.'
+              : 'Explore our hand-knitted pullovers, cardigans, and bespoke winter wraps to warm your season.'
+          }
+          actionLabel={!isAuthenticated ? 'Sign In to Account' : 'Explore Collection'}
+          onAction={() => navigate(!isAuthenticated ? '/login?redirect=cart' : '/clothing')}
         />
       </div>
     );

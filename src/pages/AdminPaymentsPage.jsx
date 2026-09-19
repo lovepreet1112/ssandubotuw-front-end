@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import adminService from '../services/adminService';
 import Badge from '../components/common/Badge';
+import { TableLoader, TableEmpty } from '../components/common/Loader';
 import { CreditCard, RefreshCw } from 'lucide-react';
 import Button from '../components/common/Button';
 import toast from 'react-hot-toast';
@@ -55,25 +56,31 @@ export const AdminPaymentsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DDCBA4]/30 text-[#2A2923]">
-              {payments.map((pay) => (
-                <tr key={pay._id} className="hover:bg-[#FAEDCD]/20">
-                  <td className="p-3 font-mono font-medium text-[#2A2923]">{pay.paymentId}</td>
-                  <td className="p-3 font-mono text-[#686558]">
-                    {pay.orderId?.orderNumber || 'Direct Order'}
-                  </td>
-                  <td className="p-3 font-semibold">{pay.userId?.name || 'Customer'}</td>
-                  <td className="p-3 font-bold text-[#D4A373]">
-                    ₹{pay.amount.toLocaleString('en-IN')}
-                  </td>
-                  <td className="p-3 uppercase">{pay.paymentMethod}</td>
-                  <td className="p-3">
-                    <Badge variant={pay.paymentStatus}>{pay.paymentStatus}</Badge>
-                  </td>
-                  <td className="p-3 text-[#686558]">
-                    {pay.paymentDate} • {pay.paymentTime}
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <TableLoader colSpan={7} message="Loading payment transactions..." />
+              ) : payments.length === 0 ? (
+                <TableEmpty colSpan={7} message="No payment transactions recorded" />
+              ) : (
+                payments.map((pay) => (
+                  <tr key={pay._id} className="hover:bg-[#FAEDCD]/20">
+                    <td className="p-3 font-mono font-medium text-[#2A2923]">{pay.paymentId}</td>
+                    <td className="p-3 font-mono text-[#686558]">
+                      {pay.orderId?.orderNumber || 'Direct Order'}
+                    </td>
+                    <td className="p-3 font-semibold">{pay.userId?.name || 'Customer'}</td>
+                    <td className="p-3 font-bold text-[#D4A373]">
+                      ₹{pay.amount.toLocaleString('en-IN')}
+                    </td>
+                    <td className="p-3 uppercase">{pay.paymentMethod}</td>
+                    <td className="p-3">
+                      <Badge variant={pay.paymentStatus}>{pay.paymentStatus}</Badge>
+                    </td>
+                    <td className="p-3 text-[#686558]">
+                      {pay.paymentDate} • {pay.paymentTime}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -152,10 +152,12 @@ export const CartDrawer = () => {
                       <ShoppingBag className="w-8 h-8" />
                     </div>
                     <h4 className="font-serif text-base font-semibold text-[#2A2923]">
-                      Your Bag is Empty
+                      {!isAuthenticated ? 'Sign In to View Bag' : 'Your Bag is Empty'}
                     </h4>
                     <p className="text-xs text-[#686558] mt-1 max-w-[220px]">
-                      Discover our handmade winter sweaters and custom knitwear pieces.
+                      {!isAuthenticated
+                        ? 'Sign in to access your saved bag, checkout, and view orders.'
+                        : 'Discover our handmade winter sweaters and custom knitwear pieces.'}
                     </p>
                     <Button
                       variant="primary"
@@ -163,10 +165,14 @@ export const CartDrawer = () => {
                       className="mt-5"
                       onClick={() => {
                         dispatch(closeCartDrawer());
-                        navigate('/clothing');
+                        if (!isAuthenticated) {
+                          navigate('/login?redirect=cart');
+                        } else {
+                          navigate('/clothing');
+                        }
                       }}
                     >
-                      Explore Collection
+                      {!isAuthenticated ? 'Sign In' : 'Explore Collection'}
                     </Button>
                   </div>
                 )}

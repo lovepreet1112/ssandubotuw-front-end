@@ -62,7 +62,7 @@ export const AdminSidebar = ({ isOpen = false, onClose }) => {
                 SANDH ATELIER
               </span>
               <span className="text-[10px] tracking-[0.2em] font-medium text-[#D4A373]">
-                ADMIN SUITE • ਸੰਧ
+                ADMIN SUITE • ਸਿੱਧੂ ਬੁਟੀਕ
               </span>
             </Link>
             <button

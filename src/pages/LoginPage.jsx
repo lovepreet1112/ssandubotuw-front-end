@@ -27,17 +27,18 @@ export const LoginPage = () => {
       if (result.payload.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate(from === 'checkout' ? '/checkout' : from);
+        const target = from === 'checkout' ? '/checkout' : from === 'cart' ? '/cart' : from;
+        navigate(target);
       }
     }
   };
 
   return (
-    <div className="min-h-[75vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-[#FDFBF7] p-8 md:p-10 border border-[#DDCBA4] rounded-sm shadow-warm-md">
+    <div className="w-full max-w-md mx-auto my-auto">
+      <div className="w-full space-y-8 bg-[#FDFBF7] p-8 md:p-10 border border-[#DDCBA4] rounded-sm shadow-warm-md">
         <div className="text-center space-y-2">
           <span className="text-[11px] uppercase tracking-[0.25em] text-[#D4A373] font-semibold">
-            ਸੰਧ ਬੁਟੀਕ • Welcome Back
+            ਸਿੱਧੂ ਬੁਟੀਕ • Welcome Back
           </span>
           <h2 className="font-serif text-3xl font-bold text-[#2A2923]">Sign In to Your Account</h2>
           <p className="text-xs text-[#686558]">
@@ -99,7 +100,7 @@ export const LoginPage = () => {
 
         <div className="text-center pt-2 text-xs text-[#686558]">
           <span>Don't have an account yet? </span>
-          <Link to="/signup" className="text-[#D4A373] font-semibold hover:underline">
+          <Link to={location.search ? `/signup${location.search}` : '/signup'} className="text-[#D4A373] font-semibold hover:underline">
             Join the Atelier Circle
           </Link>
         </div>

@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 // Layouts
 import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
+import AuthLayout from '../layouts/AuthLayout';
 
 // Guard components
 import ProtectedRoute from '../components/common/ProtectedRoute';
@@ -37,15 +38,19 @@ import AdminEnquiriesPage from '../pages/AdminEnquiriesPage';
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public & Customer Storefront Routes */}
+      {/* Standalone Auth Pages without Navbar & Footer */}
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Route>
+
+      {/* Public & Customer Storefront Routes with Navbar & Footer */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/clothing" element={<ClothingPage />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
 
         {/* Customer Protected Routes */}
         <Route

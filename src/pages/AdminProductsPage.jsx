@@ -4,6 +4,7 @@ import productService from '../services/productService';
 import Button from '../components/common/Button';
 import Badge from '../components/common/Badge';
 import Modal from '../components/common/Modal';
+import { TableLoader, TableEmpty } from '../components/common/Loader';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = [
@@ -174,63 +175,69 @@ export const AdminProductsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DDCBA4]/30 text-[#2A2923]">
-              {products.map((p) => {
-                const isLow = p.stock <= (p.lowStockThreshold || 5);
-                const isOut = p.stock <= 0;
-                return (
-                  <tr key={p._id} className="hover:bg-[#FAEDCD]/20">
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={p.thumbnail || p.images?.[0]}
-                          alt={p.name}
-                          className="w-10 h-12 object-cover rounded-sm border border-[#DDCBA4]"
-                        />
-                        <div>
-                          <p className="font-serif font-semibold text-[#2A2923] line-clamp-1">{p.name}</p>
-                          <p className="text-[11px] text-[#686558]">{p.material}</p>
+              {loading ? (
+                <TableLoader colSpan={6} message="Loading atelier products..." />
+              ) : products.length === 0 ? (
+                <TableEmpty colSpan={6} message="No products found matching your criteria" />
+              ) : (
+                products.map((p) => {
+                  const isLow = p.stock <= (p.lowStockThreshold || 5);
+                  const isOut = p.stock <= 0;
+                  return (
+                    <tr key={p._id} className="hover:bg-[#FAEDCD]/20">
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={p.thumbnail || p.images?.[0]}
+                            alt={p.name}
+                            className="w-10 h-12 object-cover rounded-sm border border-[#DDCBA4]"
+                          />
+                          <div>
+                            <p className="font-serif font-semibold text-[#2A2923] line-clamp-1">{p.name}</p>
+                            <p className="text-[11px] text-[#686558]">{p.material}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="p-3">{p.category}</td>
-                    <td className="p-3 font-semibold text-[#D4A373]">
-                      ₹{(p.discountPrice || p.price).toLocaleString('en-IN')}
-                    </td>
-                    <td className="p-3">
-                      {isOut ? (
-                        <Badge variant="outOfStock">Out of Stock (0)</Badge>
-                      ) : isLow ? (
-                        <Badge variant="lowStock">Low Stock ({p.stock})</Badge>
-                      ) : (
-                        <Badge variant="inStock">In Stock ({p.stock})</Badge>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-wrap gap-1">
-                        {p.isFeatured && <Badge variant="accent" size="xs">Featured</Badge>}
-                        {p.isUpcoming && <Badge variant="cream" size="xs">Upcoming</Badge>}
-                        {p.isNewArrival && <Badge variant="sage" size="xs">New</Badge>}
-                      </div>
-                    </td>
-                    <td className="p-3 text-right space-x-2">
-                      <button
-                        onClick={() => handleOpenEdit(p)}
-                        className="p-1 text-[#686558] hover:text-[#D4A373]"
-                        title="Edit product"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p._id)}
-                        className="p-1 text-[#686558] hover:text-[#C86D51]"
-                        title="Delete product"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td className="p-3">{p.category}</td>
+                      <td className="p-3 font-semibold text-[#D4A373]">
+                        ₹{(p.discountPrice || p.price).toLocaleString('en-IN')}
+                      </td>
+                      <td className="p-3">
+                        {isOut ? (
+                          <Badge variant="outOfStock">Out of Stock (0)</Badge>
+                        ) : isLow ? (
+                          <Badge variant="lowStock">Low Stock ({p.stock})</Badge>
+                        ) : (
+                          <Badge variant="inStock">In Stock ({p.stock})</Badge>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex flex-wrap gap-1">
+                          {p.isFeatured && <Badge variant="accent" size="xs">Featured</Badge>}
+                          {p.isUpcoming && <Badge variant="cream" size="xs">Upcoming</Badge>}
+                          {p.isNewArrival && <Badge variant="sage" size="xs">New</Badge>}
+                        </div>
+                      </td>
+                      <td className="p-3 text-right space-x-2">
+                        <button
+                          onClick={() => handleOpenEdit(p)}
+                          className="p-1 text-[#686558] hover:text-[#D4A373]"
+                          title="Edit product"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p._id)}
+                          className="p-1 text-[#686558] hover:text-[#C86D51]"
+                          title="Delete product"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

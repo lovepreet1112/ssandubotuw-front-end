@@ -34,7 +34,7 @@ export const WelcomeScreen = ({ onFinish }) => {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="text-3xl md:text-5xl font-serif font-semibold text-[#2A2923] tracking-wide"
         >
-          ਸੰਧ ਬੁਟੀਕ
+          ਸਿੱਧੂ ਬੁਟੀਕ
         </motion.h1>
 
         {/* Punjabi Heritage Tagline */}
@@ -66,7 +66,7 @@ export const WelcomeScreen = ({ onFinish }) => {
             Handmade Winter Atelier
           </p>
           <p className="text-sm md:text-base text-[#2A2923]/80 italic font-serif">
-            Welcome to Sandh Boutique — Artisanal Winter Knitwear
+            Welcome to Sidhu Boutique — Artisanal Winter Knitwear
           </p>
         </motion.div>
 
@@ -108,5 +108,38 @@ export const InlineLoader = ({ size = 'md', color = 'brand' }) => {
     </div>
   );
 };
+
+// Full-width/Centered Block Data Loader (for Admin or Sections)
+export const DataLoader = ({ message = 'Loading atelier data...' }) => (
+  <div className="py-16 flex flex-col items-center justify-center space-y-3">
+    <InlineLoader size="lg" color="brand" />
+    <p className="text-xs font-medium text-[#686558] tracking-wide animate-pulse">
+      {message}
+    </p>
+  </div>
+);
+
+// Table Row Loader for Admin Tables
+export const TableLoader = ({ colSpan, message = 'Loading atelier records...' }) => (
+  <tr>
+    <td colSpan={colSpan} className="py-16 text-center">
+      <div className="flex flex-col items-center justify-center space-y-2">
+        <InlineLoader size="lg" color="brand" />
+        <p className="text-xs font-medium text-[#686558] tracking-wide animate-pulse">
+          {message}
+        </p>
+      </div>
+    </td>
+  </tr>
+);
+
+// Table Empty State Row
+export const TableEmpty = ({ colSpan, message = 'No records found' }) => (
+  <tr>
+    <td colSpan={colSpan} className="py-12 text-center text-xs text-[#686558]">
+      {message}
+    </td>
+  </tr>
+);
 
 export default WelcomeScreen;

@@ -26,7 +26,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { fetchDashboardStats } from '../redux/slices/adminSlice';
-import { InlineLoader } from '../components/common/Loader';
+import { DataLoader } from '../components/common/Loader';
 import Badge from '../components/common/Badge';
 
 export const AdminDashboardPage = () => {
@@ -40,7 +40,7 @@ export const AdminDashboardPage = () => {
   if (loading || !stats) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
-        <InlineLoader size="lg" />
+        <DataLoader message="Loading atelier analytics & live statistics..." />
       </div>
     );
   }
