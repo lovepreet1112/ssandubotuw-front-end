@@ -4,6 +4,7 @@ import Badge from '../components/common/Badge';
 import { TableLoader, TableEmpty } from '../components/common/Loader';
 import { Users, Shield, UserCheck, UserX } from 'lucide-react';
 import toast from 'react-hot-toast';
+import socketService from '../services/socketService';
 
 export const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -23,6 +24,48 @@ export const AdminUsersPage = () => {
 
   useEffect(() => {
     loadUsers();
+
+    const handleUserCreated = (data) => {
+      const newUser = data?.user;
+      if (!newUser) return;
+      setUsers((prev) => [
+        { ...newUser, totalOrders: newUser.totalOrders || 0 },
+        ...prev.filter((u) => u._id !== newUser._id),
+      ]);
+    };
+
+    const handleUserUpdated = (data) => {
+      const updatedUser = data?.user;
+      if (!updatedUser) return;
+      setUsers((prev) =>
+        prev.map((u) => (u._id === updatedUser._id ? { ...u, ...updatedUser } : u))
+      );
+    };
+
+    const handleOrderNew = (data) => {
+      const order = data?.order;
+      if (!order) return;
+      const orderUserId = order.user?._id?.toString() || order.user?.toString();
+      if (orderUserId) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u._id === orderUserId
+              ? { ...u, totalOrders: (Number(u.totalOrders) || 0) + 1 }
+              : u
+          )
+        );
+      }
+    };
+
+    socketService.on('user:created', handleUserCreated);
+    socketService.on('user:updated', handleUserUpdated);
+    socketService.on('order:new', handleOrderNew);
+
+    return () => {
+      socketService.off('user:created', handleUserCreated);
+      socketService.off('user:updated', handleUserUpdated);
+      socketService.off('order:new', handleOrderNew);
+    };
   }, []);
 
   const handleToggleActive = async (user) => {

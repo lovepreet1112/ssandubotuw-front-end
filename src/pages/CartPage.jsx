@@ -19,6 +19,9 @@ export const CartPage = () => {
     }
   }, [isAuthenticated, dispatch]);
 
+  const validItems = (cart?.items || []).filter((item) => item && item.product && item.product._id);
+  const totalItemCount = validItems.reduce((acc, item) => acc + (Number(item.quantity) || 1), 0);
+
   const handleQuantity = (itemId, currentQty, delta, maxStock) => {
     const next = currentQty + delta;
     if (next < 1 || next > maxStock) return;
@@ -26,6 +29,7 @@ export const CartPage = () => {
   };
 
   const handleCheckout = () => {
+    if (validItems.length === 0 || summary.total <= 0) return;
     if (!isAuthenticated) {
       navigate('/login?redirect=checkout');
     } else {
@@ -33,7 +37,7 @@ export const CartPage = () => {
     }
   };
 
-  if (!cart.items || cart.items.length === 0) {
+  if (!validItems || validItems.length === 0) {
     return (
       <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <EmptyState
@@ -59,7 +63,7 @@ export const CartPage = () => {
             Your Bag • ਖਰੀਦਦਾਰੀ ਝੋਲਾ
           </span>
           <h1 className="font-serif text-3xl md:text-4xl font-bold text-[#2A2923] mt-1">
-            Shopping Bag ({summary.itemCount} Items)
+            Shopping Bag ({totalItemCount} Items)
           </h1>
         </div>
 
@@ -75,7 +79,7 @@ export const CartPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Cart Items List */}
         <div className="lg:col-span-8 divide-y divide-[#DDCBA4]/40 bg-[#FDFBF7] p-6 border border-[#DDCBA4] rounded-sm shadow-warm-sm">
-          {cart.items.map((item) => {
+          {validItems.map((item) => {
             const product = item.product;
             if (!product) return null;
             const price = item.priceSnapshot || product.discountPrice || product.price;
@@ -198,6 +202,7 @@ export const CartPage = () => {
             size="lg"
             className="w-full font-medium"
             onClick={handleCheckout}
+            disabled={validItems.length === 0 || summary.total <= 0}
             icon={ArrowRight}
             iconPosition="right"
           >

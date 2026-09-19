@@ -41,8 +41,13 @@ export const fetchNewArrivals = createAsyncThunk(
   'products/fetchNewArrivals',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await productService.getProducts({ isNewArrival: true, limit: 8 });
-      return response.data.products;
+      const response = await productService.getProducts({ isNewArrival: true, sort: 'newest', limit: 8 });
+      let products = response.data.products || [];
+      if (products.length === 0) {
+        const fallbackRes = await productService.getProducts({ sort: 'newest', limit: 8 });
+        products = fallbackRes.data.products || [];
+      }
+      return products;
     } catch (err) {
       return rejectWithValue(err.message || 'Failed to fetch new arrivals');
     }
@@ -71,6 +76,70 @@ const productSlice = createSlice({
   reducers: {
     clearCurrentProduct: (state) => {
       state.currentProduct = null;
+    },
+    productCreatedRealtime: (state, action) => {
+      const product = action.payload;
+      if (!product || !product._id) return;
+      if (!state.products.some((p) => p._id === product._id)) {
+        state.products.unshift(product);
+      }
+      if (product.isFeatured && !state.featuredProducts.some((p) => p._id === product._id)) {
+        state.featuredProducts.unshift(product);
+      }
+      // Place newly added atelier product at the very top of latest / newArrivals
+      if (!state.newArrivals.some((p) => p._id === product._id)) {
+        state.newArrivals.unshift(product);
+      }
+    },
+    productUpdatedRealtime: (state, action) => {
+      const product = action.payload;
+      if (!product || !product._id) return;
+
+      const updateList = (list) =>
+        list.map((p) => (p._id === product._id ? { ...p, ...product } : p));
+
+      state.products = updateList(state.products);
+      state.featuredProducts = updateList(state.featuredProducts);
+      state.newArrivals = updateList(state.newArrivals);
+
+      if (state.currentProduct?._id === product._id) {
+        state.currentProduct = { ...state.currentProduct, ...product };
+      }
+    },
+    productDeletedRealtime: (state, action) => {
+      const productId = action.payload;
+      if (!productId) return;
+
+      const filterList = (list) => list.filter((p) => p._id !== productId);
+
+      state.products = filterList(state.products);
+      state.featuredProducts = filterList(state.featuredProducts);
+      state.newArrivals = filterList(state.newArrivals);
+
+      if (state.currentProduct?._id === productId) {
+        state.currentProduct = null;
+      }
+    },
+    inventoryUpdatedRealtime: (state, action) => {
+      const { productId, stock, isAvailable } = action.payload || {};
+      if (!productId) return;
+
+      const updateStock = (p) =>
+        p._id === productId
+          ? {
+              ...p,
+              stock: stock !== undefined ? stock : p.stock,
+              isAvailable: isAvailable !== undefined ? isAvailable : p.isAvailable,
+            }
+          : p;
+
+      state.products = state.products.map(updateStock);
+      state.featuredProducts = state.featuredProducts.map(updateStock);
+      state.newArrivals = state.newArrivals.map(updateStock);
+
+      if (state.currentProduct?._id === productId) {
+        state.currentProduct = updateStock(state.currentProduct);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -113,5 +182,12 @@ const productSlice = createSlice({
   },
 });
 
-export const { clearCurrentProduct } = productSlice.actions;
+export const {
+  clearCurrentProduct,
+  productCreatedRealtime,
+  productUpdatedRealtime,
+  productDeletedRealtime,
+  inventoryUpdatedRealtime,
+} = productSlice.actions;
+
 export default productSlice.reducer;

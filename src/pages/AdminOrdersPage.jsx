@@ -6,6 +6,7 @@ import Button from '../components/common/Button';
 import { TableLoader, TableEmpty } from '../components/common/Loader';
 import { Eye, Edit3 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import socketService from '../services/socketService';
 
 const ORDER_STATUSES = [
   'pending',
@@ -42,6 +43,52 @@ export const AdminOrdersPage = () => {
 
   useEffect(() => {
     loadOrders();
+  }, [statusFilter]);
+
+  useEffect(() => {
+    const handleNewOrder = (data) => {
+      const order = data?.order;
+      if (!order) return;
+      setOrders((prev) => {
+        if (statusFilter !== 'all' && order.orderStatus !== statusFilter) {
+          return prev;
+        }
+        if (prev.some((o) => o._id === order._id)) return prev;
+        return [order, ...prev];
+      });
+    };
+
+    const handleOrderUpdated = (data) => {
+      const order = data?.order;
+      if (!order) return;
+      setOrders((prev) =>
+        prev
+          .map((o) => {
+            if (o._id === order._id) {
+              const mergedUser = typeof order.user === 'object' && order.user !== null ? order.user : o.user;
+              return { ...o, ...order, user: mergedUser };
+            }
+            return o;
+          })
+          .filter((o) => statusFilter === 'all' || o.orderStatus === statusFilter)
+      );
+    };
+
+    const handleOrderDeleted = (data) => {
+      const { orderId } = data || {};
+      if (!orderId) return;
+      setOrders((prev) => prev.filter((o) => o._id !== orderId));
+    };
+
+    socketService.on('order:new', handleNewOrder);
+    socketService.on('order:updated', handleOrderUpdated);
+    socketService.on('order:deleted', handleOrderDeleted);
+
+    return () => {
+      socketService.off('order:new', handleNewOrder);
+      socketService.off('order:updated', handleOrderUpdated);
+      socketService.off('order:deleted', handleOrderDeleted);
+    };
   }, [statusFilter]);
 
   const handleOpenStatusEdit = (ord) => {

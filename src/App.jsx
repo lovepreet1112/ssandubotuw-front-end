@@ -7,6 +7,7 @@ import { WelcomeScreen } from './components/common/Loader';
 import { finishInitialLoading } from './redux/slices/uiSlice';
 import { checkAuth } from './redux/slices/authSlice';
 import { fetchCart } from './redux/slices/cartSlice';
+import SocketManager from './components/common/SocketManager';
 
 export function App() {
   const dispatch = useDispatch();
@@ -59,6 +60,7 @@ export function App() {
         }}
       />
 
+      <SocketManager />
       <AppRoutes />
     </>
   );

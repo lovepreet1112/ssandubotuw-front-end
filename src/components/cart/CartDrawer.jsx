@@ -12,6 +12,9 @@ export const CartDrawer = () => {
   const { cart, summary, isDrawerOpen, loading } = useSelector((state) => state.cart);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
+  const validItems = (cart?.items || []).filter((item) => item && item.product && item.product._id);
+  const totalItemCount = validItems.reduce((acc, item) => acc + (Number(item.quantity) || 1), 0);
+
   const handleQuantityChange = (itemId, currentQty, delta, maxStock) => {
     const nextQty = currentQty + delta;
     if (nextQty < 1) return;
@@ -20,6 +23,7 @@ export const CartDrawer = () => {
   };
 
   const handleCheckout = () => {
+    if (validItems.length === 0 || summary.total <= 0) return;
     dispatch(closeCartDrawer());
     if (!isAuthenticated) {
       navigate('/login?redirect=checkout');
@@ -56,7 +60,7 @@ export const CartDrawer = () => {
                 <div className="flex items-center gap-2.5">
                   <ShoppingBag className="w-5 h-5 text-[#D4A373]" />
                   <h3 className="font-serif text-lg font-semibold text-[#2A2923]">
-                    Your Winter Bag ({summary.itemCount})
+                    Your Winter Bag ({totalItemCount})
                   </h3>
                 </div>
                 <button
@@ -67,23 +71,25 @@ export const CartDrawer = () => {
                 </button>
               </div>
 
-              {/* Free Shipping Banner */}
-              <div className="px-5 py-2 bg-[#E9EDC9]/60 border-b border-[#CCD5AE]/40 text-xs text-[#2A2923] text-center">
-                {summary.subtotal >= 2000 ? (
-                  <span className="font-medium text-emerald-800">
-                    🎉 You have qualified for Complimentary Shipping!
-                  </span>
-                ) : (
-                  <span>
-                    Add ₹{(2000 - summary.subtotal).toLocaleString('en-IN')} more to unlock Complimentary Shipping
-                  </span>
-                )}
-              </div>
+              {/* Free Shipping Banner - only when items exist */}
+              {validItems.length > 0 && (
+                <div className="px-5 py-2 bg-[#E9EDC9]/60 border-b border-[#CCD5AE]/40 text-xs text-[#2A2923] text-center">
+                  {summary.subtotal >= 2000 ? (
+                    <span className="font-medium text-emerald-800">
+                      🎉 You have qualified for Complimentary Shipping!
+                    </span>
+                  ) : (
+                    <span>
+                      Add ₹{Math.max(0, 2000 - summary.subtotal).toLocaleString('en-IN')} more to unlock Complimentary Shipping
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Drawer Item List */}
               <div className="flex-1 overflow-y-auto p-5 divide-y divide-[#DDCBA4]/30">
-                {cart.items && cart.items.length > 0 ? (
-                  cart.items.map((item) => {
+                {validItems.length > 0 ? (
+                  validItems.map((item) => {
                     const product = item.product;
                     if (!product) return null;
                     const price = item.priceSnapshot || product.discountPrice || product.price;
@@ -178,8 +184,8 @@ export const CartDrawer = () => {
                 )}
               </div>
 
-              {/* Drawer Footer */}
-              {cart.items && cart.items.length > 0 && (
+              {/* Drawer Footer - only when valid items exist */}
+              {validItems.length > 0 && (
                 <div className="p-5 border-t border-[#DDCBA4]/60 bg-[#FAEDCD]/30 space-y-3">
                   <div className="space-y-1.5 text-xs text-[#686558]">
                     <div className="flex justify-between">
@@ -218,6 +224,7 @@ export const CartDrawer = () => {
                       size="md"
                       className="w-full font-medium"
                       onClick={handleCheckout}
+                      disabled={validItems.length === 0 || summary.total <= 0}
                       icon={ArrowRight}
                       iconPosition="right"
                     >

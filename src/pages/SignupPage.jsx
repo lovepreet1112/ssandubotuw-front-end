@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { UserPlus, Lock, Mail, User, Phone } from 'lucide-react';
+import { UserPlus, Lock, Mail, User, Phone, Eye, EyeOff } from 'lucide-react';
 import { signupUser } from '../redux/slices/authSlice';
 import Button from '../components/common/Button';
 
@@ -12,6 +12,7 @@ export const SignupPage = () => {
     password: '',
     phone: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -110,15 +111,23 @@ export const SignupPage = () => {
             <div className="relative">
               <Lock className="w-4 h-4 text-[#686558] absolute left-3 top-2.5" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
                 minLength={6}
                 placeholder="Minimum 6 characters"
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
+                className="w-full pl-9 pr-10 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 text-[#686558] hover:text-[#2A2923] transition-colors focus:outline-none"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 

@@ -2,7 +2,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'https://backend-eight-pi-91.vercel.app/api';
+  import.meta.env.VITE_API_URL || 'https://sandhubtiq-backen.vercel.app/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

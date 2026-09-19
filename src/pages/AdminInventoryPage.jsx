@@ -6,6 +6,7 @@ import Button from '../components/common/Button';
 import { TableLoader, TableEmpty } from '../components/common/Loader';
 import { Layers, AlertTriangle, Check, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
+import socketService from '../services/socketService';
 
 export const AdminInventoryPage = () => {
   const [inventory, setInventory] = useState([]);
@@ -26,6 +27,27 @@ export const AdminInventoryPage = () => {
 
   useEffect(() => {
     loadInventory();
+
+    const handleInventoryUpdated = (data) => {
+      const { productId, stock, isAvailable } = data || {};
+      if (!productId) return;
+      setInventory((prev) =>
+        prev.map((item) =>
+          item._id === productId
+            ? {
+                ...item,
+                stock: stock !== undefined ? stock : item.stock,
+                isAvailable: isAvailable !== undefined ? isAvailable : item.isAvailable,
+              }
+            : item
+        )
+      );
+    };
+
+    socketService.on('inventory:updated', handleInventoryUpdated);
+    return () => {
+      socketService.off('inventory:updated', handleInventoryUpdated);
+    };
   }, []);
 
   const handleStockAdjust = async (productId, newStock) => {

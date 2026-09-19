@@ -6,6 +6,7 @@ import Badge from '../components/common/Badge';
 import Modal from '../components/common/Modal';
 import { TableLoader, TableEmpty } from '../components/common/Loader';
 import toast from 'react-hot-toast';
+import socketService from '../services/socketService';
 
 const CATEGORIES = [
   'Winter Sweaters',
@@ -51,7 +52,7 @@ export const AdminProductsPage = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const res = await productService.getProducts({ search, limit: 50 });
+      const res = await productService.getProducts({ search, sort: 'newest', limit: 50 });
       if (res.data?.products) setProducts(res.data.products);
     } catch (err) {
       toast.error('Failed to load products');
@@ -63,6 +64,54 @@ export const AdminProductsPage = () => {
   useEffect(() => {
     loadProducts();
   }, [search]);
+
+  useEffect(() => {
+    const handleProductCreated = (data) => {
+      const prod = data?.product;
+      if (!prod) return;
+      setProducts((prev) => (prev.some((p) => p._id === prod._id) ? prev : [prod, ...prev]));
+    };
+
+    const handleProductUpdated = (data) => {
+      const prod = data?.product;
+      if (!prod) return;
+      setProducts((prev) => prev.map((p) => (p._id === prod._id ? { ...p, ...prod } : p)));
+    };
+
+    const handleProductDeleted = (data) => {
+      const { productId } = data || {};
+      if (!productId) return;
+      setProducts((prev) => prev.filter((p) => p._id !== productId));
+    };
+
+    const handleInventoryUpdated = (data) => {
+      const { productId, stock, isAvailable } = data || {};
+      if (!productId) return;
+      setProducts((prev) =>
+        prev.map((p) =>
+          p._id === productId
+            ? {
+                ...p,
+                stock: stock !== undefined ? stock : p.stock,
+                isAvailable: isAvailable !== undefined ? isAvailable : p.isAvailable,
+              }
+            : p
+        )
+      );
+    };
+
+    socketService.on('product:created', handleProductCreated);
+    socketService.on('product:updated', handleProductUpdated);
+    socketService.on('product:deleted', handleProductDeleted);
+    socketService.on('inventory:updated', handleInventoryUpdated);
+
+    return () => {
+      socketService.off('product:created', handleProductCreated);
+      socketService.off('product:updated', handleProductUpdated);
+      socketService.off('product:deleted', handleProductDeleted);
+      socketService.off('inventory:updated', handleInventoryUpdated);
+    };
+  }, []);
 
   const handleOpenAdd = () => {
     setEditingProduct(null);
@@ -119,9 +168,17 @@ export const AdminProductsPage = () => {
       };
 
       if (editingProduct) {
-        await productService.updateProduct(editingProduct._id, payload);
+        const res = await productService.updateProduct(editingProduct._id, payload);
+        const updated = res?.data?.product;
+        if (updated) {
+          setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
+        }
       } else {
-        await productService.createProduct(payload);
+        const res = await productService.createProduct(payload);
+        const created = res?.data?.product;
+        if (created) {
+          setProducts((prev) => [created, ...prev.filter((p) => p._id !== created._id)]);
+        }
       }
 
       setIsModalOpen(false);

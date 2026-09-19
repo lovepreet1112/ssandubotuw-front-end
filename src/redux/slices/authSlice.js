@@ -118,6 +118,17 @@ const authSlice = createSlice({
         state.isAdmin = false;
         state.loading = false;
         state.error = null;
+      })
+      // updateProfile sync
+      .addCase('user/updateProfile/fulfilled', (state, action) => {
+        if (action.payload) {
+          state.user = { ...state.user, ...action.payload };
+          try {
+            localStorage.setItem('sandh_user', JSON.stringify(state.user));
+          } catch (e) {
+            // ignore storage error
+          }
+        }
       });
   },
 });

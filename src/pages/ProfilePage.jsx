@@ -10,7 +10,11 @@ import {
   Truck,
   XCircle,
   Eye,
+  EyeOff,
   AlertTriangle,
+  Edit3,
+  Phone,
+  CheckCircle2,
 } from 'lucide-react';
 import { fetchUserProfile, updateUserProfile } from '../redux/slices/userSlice';
 import { fetchMyOrders, cancelOrder } from '../redux/slices/orderSlice';
@@ -48,6 +52,9 @@ export const ProfilePage = () => {
     confirmPassword: '',
   });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Selected Order Modal State
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -104,6 +111,7 @@ export const ProfilePage = () => {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
       });
+      toast.success('Password changed successfully');
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
       // Handled by apiRequest toast
@@ -119,19 +127,22 @@ export const ProfilePage = () => {
       await dispatch(
         cancelOrder({
           orderId: selectedOrder._id,
-          reason: cancelReason || 'Customer requested cancellation from portal',
+          reason: cancelReason || 'Customer requested cancellation',
         })
-      );
+      ).unwrap();
+      toast.success('Order has been successfully cancelled');
       setIsCancelModalOpen(false);
       setSelectedOrder(null);
       setCancelReason('');
       dispatch(fetchMyOrders(orderStatusFilter));
     } catch (err) {
-      // Handled
+      toast.error(typeof err === 'string' ? err : err?.message || 'Failed to cancel order');
     } finally {
       setIsCancelling(false);
     }
   };
+
+  const handleCancelOrder = handleConfirmCancel;
 
   const statusTabs = [
     { label: 'All Orders', value: 'all' },
@@ -146,14 +157,25 @@ export const ProfilePage = () => {
     <div className="py-10 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       {/* Header Profile Summary */}
       <div className="bg-[#FAEDCD]/40 p-6 md:p-8 border border-[#DDCBA4] rounded-sm flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4 text-center md:text-left">
-          <div className="w-16 h-16 rounded-full bg-[#E9EDC9] border-2 border-[#D4A373] text-[#2A2923] font-serif text-2xl font-bold flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-4 text-center md:text-left flex-wrap sm:flex-nowrap justify-center sm:justify-start">
+          <div className="w-16 h-16 rounded-full bg-[#E9EDC9] border-2 border-[#D4A373] text-[#2A2923] font-serif text-2xl font-bold flex items-center justify-center shrink-0 shadow-xs">
             {user?.name?.charAt(0) || 'U'}
           </div>
-          <div>
-            <h1 className="font-serif text-2xl font-bold text-[#2A2923]">{user?.name}</h1>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="font-serif text-2xl font-bold text-[#2A2923]">{user?.name}</h1>
+              <button
+                type="button"
+                onClick={() => setActiveTab('profile')}
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#D4A373] hover:text-white bg-white hover:bg-[#D4A373] border border-[#DDCBA4] hover:border-[#D4A373] rounded-sm transition-all shadow-xs"
+                title="Edit your name, phone, and address details"
+              >
+                <Edit3 className="w-3 h-3" />
+                <span>Edit User Details</span>
+              </button>
+            </div>
             <p className="text-xs text-[#686558]">{user?.email}</p>
-            <p className="text-[11px] text-[#D4A373] font-medium mt-0.5">
+            <p className="text-[11px] text-[#D4A373] font-medium">
               Collector at Sandh Boutique Atelier
             </p>
           </div>
@@ -182,7 +204,7 @@ export const ProfilePage = () => {
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            <span>Sizing & Details</span>
+            <span>Profile & Address Details</span>
           </button>
 
           <button
@@ -317,25 +339,46 @@ export const ProfilePage = () => {
         </div>
       )}
 
-      {/* Tab 2: Personal & Sizing Information */}
+      {/* Tab 2: Personal & Address Information */}
       {activeTab === 'profile' && (
-        <div className="bg-[#FDFBF7] p-8 border border-[#DDCBA4] rounded-sm shadow-warm-sm max-w-2xl space-y-6">
-          <h2 className="font-serif text-xl font-bold text-[#2A2923]">Personal & Sizing Profile</h2>
+        <div className="bg-[#FDFBF7] p-6 md:p-8 border border-[#DDCBA4] rounded-sm shadow-warm-sm max-w-2xl space-y-6">
+          <div className="border-b border-[#DDCBA4]/40 pb-3">
+            <h2 className="font-serif text-xl font-bold text-[#2A2923]">Personal Profile & Delivery Address</h2>
+            <p className="text-xs text-[#686558] mt-0.5">
+              Update your contact details and default shipping destination for swift atelier checkout.
+            </p>
+          </div>
+
           <form onSubmit={handleProfileSubmit} className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-[#2A2923] block mb-1">Full Name</label>
-              <input
-                type="text"
-                value={profileForm.name}
-                onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                required
-                className="w-full px-3 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-[#2A2923] block mb-1">Full Name *</label>
+                <input
+                  type="text"
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                  required
+                  placeholder="Simran Kaur"
+                  className="w-full px-3 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[#2A2923] block mb-1">
+                  Email Address <span className="text-[10px] text-[#686558] font-normal">(Account bound)</span>
+                </label>
+                <input
+                  type="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="w-full px-3 py-2 text-xs bg-stone-100/70 border border-[#DDCBA4] text-[#686558] rounded-sm cursor-not-allowed"
+                />
+              </div>
             </div>
 
             <div>
               <label className="text-xs font-semibold text-[#2A2923] block mb-1">
-                Phone Contact
+                Phone Contact *
               </label>
               <input
                 type="tel"
@@ -348,7 +391,7 @@ export const ProfilePage = () => {
 
             <div>
               <label className="text-xs font-semibold text-[#2A2923] block mb-1">
-                Default Delivery Address
+                Default Delivery Address / Street *
               </label>
               <input
                 type="text"
@@ -361,7 +404,7 @@ export const ProfilePage = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-semibold text-[#2A2923] block mb-1">City</label>
+                <label className="text-xs font-semibold text-[#2A2923] block mb-1">City *</label>
                 <input
                   type="text"
                   value={profileForm.city}
@@ -372,7 +415,7 @@ export const ProfilePage = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#2A2923] block mb-1">State</label>
+                <label className="text-xs font-semibold text-[#2A2923] block mb-1">State *</label>
                 <input
                   type="text"
                   value={profileForm.state}
@@ -383,7 +426,7 @@ export const ProfilePage = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#2A2923] block mb-1">Pincode</label>
+                <label className="text-xs font-semibold text-[#2A2923] block mb-1">Pincode *</label>
                 <input
                   type="text"
                   value={profileForm.pincode}
@@ -394,15 +437,28 @@ export const ProfilePage = () => {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              isLoading={isUpdatingProfile}
-              disabled={isUpdatingProfile}
-            >
-              Save Profile Changes
-            </Button>
+            <div>
+              <label className="text-xs font-semibold text-[#2A2923] block mb-1">Country</label>
+              <input
+                type="text"
+                value={profileForm.country || 'India'}
+                onChange={(e) => setProfileForm({ ...profileForm, country: e.target.value })}
+                placeholder="India"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
+              />
+            </div>
+
+            <div className="pt-2">
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                isLoading={isUpdatingProfile}
+                disabled={isUpdatingProfile}
+              >
+                Save Profile Changes
+              </Button>
+            </div>
           </form>
         </div>
       )}
@@ -416,44 +472,74 @@ export const ProfilePage = () => {
               <label className="text-xs font-semibold text-[#2A2923] block mb-1">
                 Current Password
               </label>
-              <input
-                type="password"
-                value={passwordForm.currentPassword}
-                onChange={(e) =>
-                  setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
-                }
-                required
-                className="w-full px-3 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
-              />
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={passwordForm.currentPassword}
+                  onChange={(e) =>
+                    setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+                  }
+                  required
+                  className="w-full px-3 pr-10 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-2.5 text-[#686558] hover:text-[#2A2923] transition-colors focus:outline-none"
+                  aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
               <label className="text-xs font-semibold text-[#2A2923] block mb-1">
                 New Password
               </label>
-              <input
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                required
-                minLength={6}
-                className="w-full px-3 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
-              />
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  required
+                  minLength={6}
+                  className="w-full px-3 pr-10 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-2.5 text-[#686558] hover:text-[#2A2923] transition-colors focus:outline-none"
+                  aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
               <label className="text-xs font-semibold text-[#2A2923] block mb-1">
                 Confirm New Password
               </label>
-              <input
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={(e) =>
-                  setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-                }
-                required
-                className="w-full px-3 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+                  }
+                  required
+                  className="w-full px-3 pr-10 py-2 text-xs bg-white border border-[#DDCBA4] rounded-sm focus:outline-none focus:border-[#D4A373]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-2.5 text-[#686558] hover:text-[#2A2923] transition-colors focus:outline-none"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <Button

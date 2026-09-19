@@ -63,6 +63,31 @@ const orderSlice = createSlice({
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
     },
+    orderUpdatedRealtime: (state, action) => {
+      const updated = action.payload;
+      if (!updated || !updated._id) return;
+      const index = state.orders.findIndex((o) => o._id === updated._id);
+      if (index > -1) {
+        state.orders[index] = { ...state.orders[index], ...updated };
+      }
+      if (state.currentOrder?._id === updated._id) {
+        state.currentOrder = { ...state.currentOrder, ...updated };
+      }
+    },
+    orderAddedRealtime: (state, action) => {
+      const newOrder = action.payload;
+      if (!newOrder || !newOrder._id) return;
+      if (!state.orders.some((o) => o._id === newOrder._id)) {
+        state.orders.unshift(newOrder);
+      }
+    },
+    orderDeletedRealtime: (state, action) => {
+      const orderId = action.payload;
+      state.orders = state.orders.filter((o) => o._id !== orderId);
+      if (state.currentOrder?._id === orderId) {
+        state.currentOrder = null;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -109,5 +134,10 @@ const orderSlice = createSlice({
   },
 });
 
-export const { clearCurrentOrder } = orderSlice.actions;
+export const {
+  clearCurrentOrder,
+  orderUpdatedRealtime,
+  orderAddedRealtime,
+  orderDeletedRealtime,
+} = orderSlice.actions;
 export default orderSlice.reducer;
